@@ -133,6 +133,15 @@ class RunCommand extends ShopwareCommand
                 $x++;
             }
         }
+
+        /*
+         * Truncate customer search index
+         *
+         * Note: I used delete instead of truncate, because truncate does not respect fk etc. Delete is the saver method
+         */
+        $output->writeln("<info>Truncate customer search index</info>");
+        $this->conn->exec("DELETE FROM s_customer_search_index");
+
         $this->conn->exec("COMMIT");
 
         // Remove E-Mail SMTP-Data
