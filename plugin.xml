@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.4/engine/Shopware/Components/Plugin/schema/plugin.xsd">
+    <label lang="de">prod2testing</label>
+    <label lang="en">prod2testing</label>
+    <version>1.0.0</version>
+    <link>https://mschop.de</link>
+    <author>Martin Schohpaus</author>
+    <description lang="de">
+        Transformiert eine Produktionsdatenbank in eine Staging- oder Entwicklungsdatenbank.
+    </description>
+    <description lang="en">
+        Transforms a production db into a staging or development db.
+    </description>
+</plugin>

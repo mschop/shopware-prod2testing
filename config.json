@@ -1,0 +1,53 @@
+{
+  "s_user": {
+    "email": "test{{x}}@test.org",
+    "firstname": "firstname{{x}}",
+    "lastname": "lastname{{x}}",
+    "sessionID": "",
+    "referer": "",
+    "internalcomment": "",
+    "birthday": ""
+  },
+  "s_user_addresses": {
+    "company": "company{{x}}",
+    "department": "department{{x}}",
+    "salutation": "salutation{{x}}",
+    "title": "title{{x}}",
+    "firstname": "firstname{{x}}",
+    "lastname": "lastname{{x}}",
+    "street": "street{{x}}",
+    "zipcode": "zipcode{{x}}",
+    "city": "city{{x}}",
+    "ustid": "ustid{{x}}",
+    "phone": "phone{{x}}",
+    "additional_address_line1": "additional_address_line1{{x}}",
+    "additional_address_line2": "additional_address_line2{{x}}"
+  },
+  "s_user_addresses_attributes": {
+    "text1": "",
+    "text2": "",
+    "text3": "",
+    "text4": "",
+    "text5": "",
+    "text6": ""
+  },
+  "s_user_attributes": {
+    "bestit_amazon_user_id": "",
+    "bestit_amazon_user_name": ""
+  },
+  "s_user_billingaddress": {
+    "company": "company{{x}}",
+    "department": "department{{x}}",
+    "salutation": "salutation{{x}}",
+    "firstname": "firstname{{x}}",
+    "lastname": "lastname{{x}}",
+    "street": "street{{x}}",
+    "zipcode": "zipcode{{x}}",
+    "city": "city{{x}}",
+    "phone": "phone{{x}}",
+    "ustid": "ustid{{x}}",
+    "additional_address_line1": "additional_address_line1{{x}}",
+    "additional_address_line2": "additional_address_line2{{x}}",
+    "title": "title{{x}}"
+  }
+}

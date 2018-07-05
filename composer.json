@@ -1,0 +1,17 @@
+{
+  "name": "mschop/shopware-prod2testing",
+  "description": "Shopware plugin, that enables you to tranform a production db to a testing db",
+  "type": "project",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "mschop",
+      "email": "mschopdev@gmail.com",
+      "homepage": "https://mschop.de",
+      "role": "Developer"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/mschop/shopware-prod2testing/issues"
+  }
+}
