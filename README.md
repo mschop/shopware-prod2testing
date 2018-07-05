@@ -10,8 +10,35 @@ This plugins runs all necessary steps, to transform a production db to a staging
 - Download the repo
 - Place it into /custom/plugins
 
-# Run
+## Run
 
 The plugin can be executed by running the following command:
 
     bin/console prod2testing:run
+    
+## Anonymization Configuration
+
+The plugin replaces all non empty values from the db, depending on the provided configuration. The anonymization
+configuration is defined in the file `config.json`. You have two ways, to change the configuration:
+
+### Override
+
+```
+bin/console prod2testing:run --config /path/to/your/custom-config.json
+```
+
+This replaces the anonymization configuration completely.
+
+### Extend
+
+```
+bin/console prod2testing:run --additionalConfig /path/to/your/extension-config.json
+```
+
+This extends or overrides specific entries in the original config.
+
+You can also declare multiple --additionalConfig options and combine it with the --config option.
+```
+bin/console prod2testing:run --additionalConfig /path1.json --additionalConfig /path2.json --config /base-config.json
+```
+
