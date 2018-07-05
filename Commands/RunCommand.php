@@ -30,7 +30,7 @@ class RunCommand extends ShopwareCommand
         $this->setName('prod2testing:run');
 
         $this->addOption('config', 'c', InputOption::VALUE_OPTIONAL, 'Path to a configuriation json file, that should be used instead of the default config.');
-        $this->addOption('additionalConfig', 'a', InputOption::VALUE_OPTIONAL|InputOption::VALUE_IS_ARRAY, 'Path to a configuration json file, that should be added to the default config');
+        $this->addOption('additionalConfig', 'a', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Path to a configuration json file, that should be added to the default config');
     }
 
     /**
@@ -93,12 +93,12 @@ class RunCommand extends ShopwareCommand
             }
         }
 
-        // Do the work
+        // Run Anonymization
         $this->conn->exec("START TRANSACTION");
         foreach ($config as $tableName => $tableConfig) {
             $output->writeln("<info>Anonymize $tableName</info>");
             $keys = $this->conn->query("SHOW KEYS FROM `$tableName` WHERE Key_name = 'PRIMARY'")->fetchAll(\PDO::FETCH_ASSOC);
-            $keyNames = array_map(function($row) {
+            $keyNames = array_map(function ($row) {
                 return $row['Column_name'];
             }, $keys);
             $keyNamesString = '`' . implode('`, `', $keyNames) . '`';
@@ -109,10 +109,12 @@ class RunCommand extends ShopwareCommand
                 $qb = $this->conn->createQueryBuilder();
                 $qb->update($tableName);
 
+                $hasUpdate = false;
                 foreach ($tableConfig as $columnName => $value) {
                     if (empty($row[$columnName])) {
                         continue;
                     }
+                    $hasUpdate = true;
                     if (is_string($value)) {
                         $value = str_replace('{{x}}', $x, $value);
                     }
@@ -120,8 +122,9 @@ class RunCommand extends ShopwareCommand
                     $qb->set($columnName, $param);
                     $qb->setParameter($param, $value);
                 }
+                if (!$hasUpdate) continue;
 
-                foreach($keyNames as $keyName) {
+                foreach ($keyNames as $keyName) {
                     $qb->where(
                         $qb->expr()->eq($keyName, $row[$keyName])
                     );
@@ -131,6 +134,9 @@ class RunCommand extends ShopwareCommand
             }
         }
         $this->conn->exec("COMMIT");
+
+        // Remove E-Mail SMTP-Data
+//        $this->conn
 
         return 0;
     }
