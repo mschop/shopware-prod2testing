@@ -9,6 +9,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+require_once(__DIR__ . '/../vendor/autoload.php');
+
 class RunCommand extends ShopwareCommand
 {
     const OPTION_REMOVE_TLS = 'remove-secure-flag';
@@ -17,6 +19,7 @@ class RunCommand extends ShopwareCommand
     protected $conn;
     protected $dbConfig;
     protected $configWriter;
+    protected $faker;
 
     /**
      * RunCommand constructor.
@@ -82,7 +85,6 @@ class RunCommand extends ShopwareCommand
          * do tasks
          */
         $this->anonymizeData($input, $output);
-        $this->clearSearchIndex($input, $output);
         $this->removeSecrets($input, $output);
         $this->removeTLSFromShops($input, $output);
 
@@ -106,7 +108,7 @@ class RunCommand extends ShopwareCommand
     protected function fetchSchema($config)
     {
         $allTables = [];
-        foreach ($config as $tableName => $tableConfig) {
+        foreach ($config->anonymize as $tableName => $tableConfig) {
             $allTables[] = $tableName;
         }
         $stmt = $this->conn->executeQuery("
@@ -183,13 +185,19 @@ class RunCommand extends ShopwareCommand
             $config = array_replace_recursive($config, $additionalConfig);
         }
 
+        $lang = $config->fakerLanguageProvider;
+        $this->faker = \Faker\Factory::create($lang);
+        // Add provider at_AT\Payment because de_DE has no vat generator
+        $paymentClass = "\Faker\Provider\at_AT\Payment";
+        $this->faker->addProvider(new $paymentClass($this->faker));
+
         // fetch schema information
         $informationSchema = $this->fetchSchema($config);
 
         $output->writeln('<info>- anonymize:</info>');
 
         // run anonymization
-        foreach ($config as $tableName => $tableConfig) {
+        foreach ($config->anonymize as $tableName => $tableConfig) {
 
             if (!isset($informationSchema[$tableName])) {
                 $output->writeln("<warning>\t\tThe table '$tableName' is configured but does not exist in db. Continuing with next table.</warning>");
@@ -220,7 +228,9 @@ class RunCommand extends ShopwareCommand
                         continue;
                     }
                     $hasUpdate = true;
-                    if (is_string($value)) {
+                    if (is_object($value)) {
+                        $value = $this->fakeValue($value);
+                    } elseif (is_string($value)) {
                         $value = str_replace('{{x}}', $x, $value);
                     }
                     $param = ":{$columnName}_{$x}";
@@ -238,20 +248,12 @@ class RunCommand extends ShopwareCommand
                 $x++;
             }
         }
-    }
 
-    /**
-     * Truncate customer search index
-     * Note: I used delete instead of truncate, because truncate does not respect fk etc. Delete is the saver method
-     *
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @throws \Doctrine\DBAL\DBALException
-     */
-    protected function clearSearchIndex(InputInterface $input, OutputInterface $output)
-    {
-        $output->writeln("<info>- truncate customer search index</info>");
-        $this->conn->exec("DELETE FROM s_customer_search_index");
+        $output->writeln('<info>- truncate:</info>');
+        foreach ($config->truncate as $table) {
+            $output->writeln("<info>\t- $table</info>");
+            $this->conn->exec("DELETE FROM `$table`");
+        }
     }
 
     /**
@@ -288,5 +290,14 @@ class RunCommand extends ShopwareCommand
         $output->writeln('<info>- deactivate tls for all shops</info>');
         $removeTLS = $input->getOption(self::OPTION_REMOVE_TLS);
         if ($removeTLS) $this->conn->exec("UPDATE s_core_shops SET secure = 0");
+    }
+
+    protected function fakeValue($definition)
+    {
+        $type = $definition->type;
+        $params = $definition->params ?? [];
+        $unique = $definition->unique ?? false;
+        $faker = $unique ? $this->faker->unique() : $this->faker;
+        return call_user_func_array([$faker, $type], $params);
     }
 }

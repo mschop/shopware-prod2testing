@@ -1,176 +1,281 @@
 {
-  "s_blog_comments": {
-    "email": "mail{{x}}@blogcomment.org"
+  "fakerLanguageProvider": "de_DE",
+  "anonymize": {
+    "s_blog_comments": {
+      "email": {
+        "type": "email"
+      }
+    },
+    "s_campaigns_logs": {
+      "email": {
+        "type": "email"
+      }
+    },
+    "s_campaigns_mailaddresses": {
+      "email": {
+        "type": "email"
+      }
+    },
+    "s_campaigns_maildata": {
+      "email": {
+        "type": "email"
+      },
+      "firstname": {
+        "type": "firstName"
+      },
+      "lastname": {
+        "type": "lastName"
+      },
+      "street": {
+        "type": "streetName"
+      },
+      "zipcode": {
+        "type": "postcode"
+      },
+      "city": {
+        "type": "city"
+      }
+    },
+    "s_emarketing_referer": {
+      "referer": ""
+    },
+    "s_emarketing_tellafriend": {
+      "recipient": {
+        "type": "email"
+      }
+    },
+    "s_order": {
+      "comment": "",
+      "customercomment": "",
+      "internalcomment": "",
+      "referer": "",
+      "trackingcode": "",
+      "remote_addr": null
+    },
+    "s_order_attributes": {
+      "attribute1": "",
+      "attribute2": "",
+      "attribute3": "",
+      "attribute4": "",
+      "attribute5": "",
+      "attribute6": "",
+      "bestit_amazon_capture_id": "",
+      "bestit_amazon_authorization_id": "",
+      "bestit_amazon_refund_id": "",
+      "bestit_amazon_simulation_code": ""
+    },
+    "s_order_billingaddress": {
+      "company": {
+        "type": "company"
+      },
+      "department": "department{{x}}",
+      "customernumber": "customernumber{{x}}",
+      "firstname": {
+        "type": "firstName"
+      },
+      "lastname": {
+        "type": "lastName"
+      },
+      "street": {
+        "type": "streetName"
+      },
+      "zipcode": "00000",
+      "city": {
+        "type": "city"
+      },
+      "phone": {
+        "type": "phoneNumber"
+      },
+      "additional_address_line1": "",
+      "additional_address_line2": "",
+      "title": ""
+    },
+    "s_order_billingaddress_attributes": {
+      "text1": "",
+      "text2": "",
+      "text3": "",
+      "text4": "",
+      "text5": "",
+      "text6": ""
+    },
+    "s_order_shippingaddress": {
+      "company": {
+        "type": "company"
+      },
+      "department": "department{{x}}",
+      "salutation": "salutation{{x}}",
+      "firstname": {
+        "type": "firstName"
+      },
+      "lastname": {
+        "type": "lastName"
+      },
+      "street": {
+        "type": "streetName"
+      },
+      "city": {
+        "type": "city"
+      },
+      "phone": {
+        "type": "phoneNumber"
+      },
+      "additional_address_line1": "",
+      "additional_address_line2": ""
+    },
+    "s_order_shippingaddress_attributes": {
+      "text1": "",
+      "text2": "",
+      "text3": "",
+      "text4": "",
+      "text5": "",
+      "text6": ""
+    },
+    "s_statistics_currentusers": {
+      "remoteaddr": {
+        "type": "ipv4"
+      }
+    },
+    "s_statistics_pool": {
+      "remoteaddr": {
+        "type": "ipv4"
+      }
+    },
+    "s_statistics_referer": {
+      "referer": ""
+    },
+    "s_user": {
+      "email": {
+        "type": "email"
+      },
+      "firstname": {
+        "type": "firstName"
+      },
+      "lastname": {
+        "type": "lastName"
+      },
+      "sessionID": "",
+      "referer": "",
+      "internalcomment": "",
+      "birthday": {
+        "type": "date"
+      }
+    },
+    "s_user_addresses": {
+      "company": {
+        "type": "company"
+      },
+      "department": "department{{x}}",
+      "salutation": "salutation{{x}}",
+      "title": "title{{x}}",
+      "firstname": {
+        "type": "firstName"
+      },
+      "lastname": {
+        "type": "lastName"
+      },
+      "street": {
+        "type": "streetName"
+      },
+      "zipcode": {
+        "type": "postcode"
+      },
+      "city": {
+        "type": "city"
+      },
+      "ustid": {
+        "type": "vat"
+      },
+      "phone": {
+        "type": "phoneNumber"
+      },
+      "additional_address_line1": "",
+      "additional_address_line2": ""
+    },
+    "s_user_addresses_attributes": {
+      "text1": "",
+      "text2": "",
+      "text3": "",
+      "text4": "",
+      "text5": "",
+      "text6": ""
+    },
+    "s_user_attributes": {
+      "bestit_amazon_user_id": "",
+      "bestit_amazon_user_name": ""
+    },
+    "s_user_billingaddress": {
+      "company": {
+        "type": "company"
+      },
+      "department": "department{{x}}",
+      "salutation": "salutation{{x}}",
+      "firstname": {
+        "type": "firstName"
+      },
+      "lastname": {
+        "type": "lastName"
+      },
+      "street": {
+        "type": "streetName"
+      },
+      "zipcode": {
+        "type": "postcode"
+      },
+      "city": {
+        "type": "city"
+      },
+      "phone": {
+        "type": "phoneNumber"
+      },
+      "ustid": {
+        "type": "vat"
+      },
+      "additional_address_line1": "",
+      "additional_address_line2": "",
+      "title": "title{{x}}"
+    },
+    "s_user_billingaddress_attributes": {
+      "text1": "",
+      "text2": "",
+      "text3": "",
+      "text4": "",
+      "text5": "",
+      "text6": ""
+    },
+    "s_user_shippingaddress": {
+      "company": {
+        "type": "company"
+      },
+      "department": "department{{x}}",
+      "firstname": {
+        "type": "firstName"
+      },
+      "lastname": {
+        "type": "lastName"
+      },
+      "street": {
+        "type": "streetName"
+      },
+      "zipcode": {
+        "type": "postcode"
+      },
+      "city": {
+        "type": "city"
+      },
+      "additional_address_line1": "",
+      "additional_address_line2": "",
+      "title": "title{{x}}"
+    },
+    "s_user_shippingaddress_attributes": {
+      "text1": "",
+      "text2": "",
+      "text3": "",
+      "text4": "",
+      "text5": "",
+      "text6": ""
+    }
   },
-  "s_campaigns_logs": {
-    "email": "mail{{x}}@campaignlogs.org"
-  },
-  "s_campaigns_mailaddresses": {
-    "email": "mail{{x}}@campaigns-mailaddresses.org"
-  },
-  "s_campaigns_maildata": {
-    "email": "mail{{x}}@campaigns-maildata.org",
-    "title": "title{{x}}",
-    "firstname": "firstname{{x}}",
-    "lastname": "lastname{{x}}",
-    "street": "street{{x}}",
-    "zipcode": "000000",
-    "city": "city{{x}}"
-  },
-  "s_emarketing_referer": {
-    "referer": ""
-  },
-  "s_emarketing_tellafriend": {
-    "recipient": "mail{{x}}@recipient.org"
-  },
-  "s_order": {
-    "comment": "",
-    "customercomment": "",
-    "internalcomment": "",
-    "referer": "",
-    "trackingcode": "",
-    "remote_addr": null
-  },
-  "s_order_attributes": {
-    "attribute1": "",
-    "attribute2": "",
-    "attribute3": "",
-    "attribute4": "",
-    "attribute5": "",
-    "attribute6": "",
-    "bestit_amazon_capture_id": "",
-    "bestit_amazon_authorization_id": "",
-    "bestit_amazon_refund_id": "",
-    "bestit_amazon_simulation_code": ""
-  },
-  "s_order_billingaddress": {
-    "company": "company{{x}}",
-    "department": "department{{x}}",
-    "customernumber": "customernumber{{x}}",
-    "firstname": "firstname{{x}}",
-    "lastname": "lastname{{x}}",
-    "street": "street{{x}}",
-    "zipcode": "00000",
-    "city": "city{{x}}",
-    "phone": "phone{{x}}",
-    "additional_address_line1": "additional_address_line1{{x}}",
-    "additional_address_line2": "additional_address_line2{{x}}",
-    "title": "title{{x}}"
-  },
-  "s_order_billingaddress_attributes": {
-    "text1": "",
-    "text2": "",
-    "text3": "",
-    "text4": "",
-    "text5": "",
-    "text6": ""
-  },
-  "s_order_shippingaddress": {
-    "company": "company{{x}}",
-    "department": "department{{x}}",
-    "salutation": "salutation{{x}}",
-    "firstname": "firstname{{x}}",
-    "lastname": "lastname{{x}}",
-    "street": "street{{x}}",
-    "city": "city{{x}}",
-    "phone": "phone{{x}}",
-    "additional_address_line1": "additional_address_line1{{x}}",
-    "additional_address_line2": "additional_address_line2{{x}}"
-  },
-  "s_order_shippingaddress_attributes": {
-    "text1": "",
-    "text2": "",
-    "text3": "",
-    "text4": "",
-    "text5": "",
-    "text6": ""
-  },
-  "s_statistics_currentusers": {
-    "remoteaddr": "0.0.0.0"
-  },
-  "s_statistics_pool": {
-    "remoteaddr": "0.0.0.0"
-  },
-  "s_statistics_referer": {
-    "referer": ""
-  },
-  "s_user": {
-    "email": "test{{x}}@test.org",
-    "firstname": "firstname{{x}}",
-    "lastname": "lastname{{x}}",
-    "sessionID": "",
-    "referer": "",
-    "internalcomment": "",
-    "birthday": "1960-01-01"
-  },
-  "s_user_addresses": {
-    "company": "company{{x}}",
-    "department": "department{{x}}",
-    "salutation": "salutation{{x}}",
-    "title": "title{{x}}",
-    "firstname": "firstname{{x}}",
-    "lastname": "lastname{{x}}",
-    "street": "street{{x}}",
-    "zipcode": "zipcode{{x}}",
-    "city": "city{{x}}",
-    "ustid": "ustid{{x}}",
-    "phone": "phone{{x}}",
-    "additional_address_line1": "additional_address_line1{{x}}",
-    "additional_address_line2": "additional_address_line2{{x}}"
-  },
-  "s_user_addresses_attributes": {
-    "text1": "",
-    "text2": "",
-    "text3": "",
-    "text4": "",
-    "text5": "",
-    "text6": ""
-  },
-  "s_user_attributes": {
-    "bestit_amazon_user_id": "",
-    "bestit_amazon_user_name": ""
-  },
-  "s_user_billingaddress": {
-    "company": "company{{x}}",
-    "department": "department{{x}}",
-    "salutation": "salutation{{x}}",
-    "firstname": "firstname{{x}}",
-    "lastname": "lastname{{x}}",
-    "street": "street{{x}}",
-    "zipcode": "zipcode{{x}}",
-    "city": "city{{x}}",
-    "phone": "phone{{x}}",
-    "ustid": "ustid{{x}}",
-    "additional_address_line1": "additional_address_line1{{x}}",
-    "additional_address_line2": "additional_address_line2{{x}}",
-    "title": "title{{x}}"
-  },
-  "s_user_billingaddress_attributes": {
-    "text1": "",
-    "text2": "",
-    "text3": "",
-    "text4": "",
-    "text5": "",
-    "text6": ""
-  },
-  "s_user_shippingaddress": {
-    "company": "company{{x}}",
-    "department": "department{{x}}",
-    "firstname": "firstname{{x}}",
-    "lastname": "lastname{{x}}",
-    "street": "street{{x}}",
-    "zipcode": "zipcode{{x}}",
-    "city": "city{{x}}",
-    "additional_address_line1": "additional_address_line1{{x}}",
-    "additional_address_line2": "additional_address_line2{{x}}",
-    "title": "title{{x}}"
-  },
-  "s_user_shippingaddress_attributes": {
-    "text1": "",
-    "text2": "",
-    "text3": "",
-    "text4": "",
-    "text5": "",
-    "text6": ""
-  }
+  "truncate": [
+    "s_customer_search_index"
+  ]
 }

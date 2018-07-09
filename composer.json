@@ -13,5 +13,8 @@
   ],
   "support": {
     "issues": "https://github.com/mschop/shopware-prod2testing/issues"
+  },
+  "require": {
+    "fzaninotto/faker": "~1.7"
   }
 }
