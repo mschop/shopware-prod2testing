@@ -8,6 +8,7 @@
         <service id="prod2testing.run_command" class="Prod2Testing\Commands\RunCommand">
             <argument type="service" id="dbal_connection" />
             <argument>%shopware.db%</argument>
+            <argument type="service" id="config_writer" />
             <tag name="console.command" />
         </service>
     </services>
