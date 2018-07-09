@@ -4,24 +4,32 @@ namespace Prod2Testing\Commands;
 
 use Doctrine\DBAL\Connection;
 use Shopware\Commands\ShopwareCommand;
+use Shopware\Components\ConfigWriter;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class RunCommand extends ShopwareCommand
 {
+    const OPTION_REMOVE_TLS = 'remove-tls';
+    const OPTION_NO_SECRET_REMOVE = 'no-secret-wipe';
+
     protected $conn;
     protected $dbConfig;
+    protected $configWriter;
 
     /**
      * RunCommand constructor.
-     * @param $conn
+     * @param Connection $conn
+     * @param $dbConfig
+     * @param ConfigWriter $configWriter
      */
-    public function __construct(Connection $conn, $dbConfig)
+    public function __construct(Connection $conn, array $dbConfig, ConfigWriter $configWriter)
     {
         parent::__construct();
         $this->conn = $conn;
         $this->dbConfig = $dbConfig;
+        $this->configWriter = $configWriter;
     }
 
 
@@ -29,8 +37,30 @@ class RunCommand extends ShopwareCommand
     {
         $this->setName('prod2testing:run');
 
-        $this->addOption('config', 'c', InputOption::VALUE_OPTIONAL, 'Path to a configuriation json file, that should be used instead of the default config.');
-        $this->addOption('additionalConfig', 'a', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Path to a configuration json file, that should be added to the default config');
+        $this->addOption(
+            'config',
+            'c',
+            InputOption::VALUE_OPTIONAL,
+            'Path to a configuriation json file, that should be used instead of the default config.'
+        );
+        $this->addOption(
+            'additionalConfig',
+            'a',
+            InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
+            'Path to a configuration json file, that should be added to the default config'
+        );
+        $this->addOption(
+            self::OPTION_REMOVE_TLS,
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'You can disable tls, if you dev maschine is not created with tls support'
+        );
+        $this->addOption(
+            self::OPTION_NO_SECRET_REMOVE,
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'Disable wiping of secrets (e.g. smtp, payment methods etc.)'
+        );
     }
 
     /**
@@ -41,111 +71,29 @@ class RunCommand extends ShopwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $configFile = __DIR__ . '/../config.json';
-        $replaceConfigFile = $input->getOption('config');
-        if ($replaceConfigFile) {
-            $configFile = $replaceConfigFile;
-        }
-        if (!is_file($configFile)) {
-            $output->writeln('<error>The given config file is not readable</error>');
-            return 1;
-        }
-        if (!is_readable($configFile)) {
-            $output->writeln('<error>The given config file is not readable</error>');
-            return 1;
-        }
-        $config = json_decode(file_get_contents($configFile));
-
-        if (!$config) {
-            $output->writeln('<error>The configuration contains invalid json</error>');
-        }
-
-        foreach ($input->getOption('additionalConfig') as $additionalConfigFile) {
-            if (!is_file($additionalConfigFile)) {
-                $output->writeln("<error>The additional config '$additionalConfigFile' is not a file.</error>");
-                return 1;
-            }
-            if (!is_readable($additionalConfigFile)) {
-                $output->writeln("<error>The additional config '$additionalConfigFile' is not readable.</error>");
-                return 1;
-            }
-            $additionalConfig = json_decode(file_get_contents($additionalConfigFile));
-            if (!$additionalConfig) {
-                $output->writeln("<error>The additional config '$additionalConfigFile' contains invalid json.</error>");
-            }
-            $config = array_replace_recursive($config, $additionalConfig);
-        }
-
-        // fetch schema information
-        $informationSchema = $this->fetchSchema($config);
-
-
-        // Check whether tables and columns defined in the config exist
-        foreach ($config as $tableName => $tableConfig) {
-            if (!isset($informationSchema[$tableName])) {
-                $output->writeln("<warning>The table '$tableName' is configured but does not exist in db. Aborting.</warning>");
-            }
-            $tableSchema = $informationSchema[$tableName];
-            foreach ($tableConfig as $columnName => $value) {
-                if (!isset($tableSchema[$columnName])) {
-                    $output->writeln("<warning>The column '$tableName.$columnName' is configured but does not exist in db. Aborting.</warning>");
-                }
-            }
-        }
-
-        // Run Anonymization
-        $this->conn->exec("START TRANSACTION");
-        foreach ($config as $tableName => $tableConfig) {
-            $output->writeln("<info>Anonymize $tableName</info>");
-            $keys = $this->conn->query("SHOW KEYS FROM `$tableName` WHERE Key_name = 'PRIMARY'")->fetchAll(\PDO::FETCH_ASSOC);
-            $keyNames = array_map(function ($row) {
-                return $row['Column_name'];
-            }, $keys);
-            $keyNamesString = '`' . implode('`, `', $keyNames) . '`';
-            $columnNamesString = '`' . implode('`, `', array_keys((array)$tableConfig)) . '`';
-            $x = 1;
-            $stmt = $this->conn->query("SELECT $keyNamesString, $columnNamesString FROM `$tableName`");
-            while (($row = $stmt->fetch(\PDO::FETCH_ASSOC))) {
-                $qb = $this->conn->createQueryBuilder();
-                $qb->update($tableName);
-
-                $hasUpdate = false;
-                foreach ($tableConfig as $columnName => $value) {
-                    if (empty($row[$columnName])) {
-                        continue;
-                    }
-                    $hasUpdate = true;
-                    if (is_string($value)) {
-                        $value = str_replace('{{x}}', $x, $value);
-                    }
-                    $param = ":{$columnName}_{$x}";
-                    $qb->set($columnName, $param);
-                    $qb->setParameter($param, $value);
-                }
-                if (!$hasUpdate) continue;
-
-                foreach ($keyNames as $keyName) {
-                    $qb->where(
-                        $qb->expr()->eq($keyName, $row[$keyName])
-                    );
-                }
-                $qb->execute();
-                $x++;
-            }
-        }
+        /*
+         * Start transaction
+         */
+        $output->writeln('<info>START TRANSACTION</info>');
+        $output->writeln('');
+        $this->conn->exec('START TRANSACTION');
 
         /*
-         * Truncate customer search index
-         *
-         * Note: I used delete instead of truncate, because truncate does not respect fk etc. Delete is the saver method
+         * Do tasks
          */
-        $output->writeln("<info>Truncate customer search index</info>");
-        $this->conn->exec("DELETE FROM s_customer_search_index");
+        $this->anonymizeData($input, $output);
+        $this->clearSearchIndex($input, $output);
+        $this->removeSecrets($input, $output);
+        $this->removeTLSFromShops($input, $output);
 
-        $this->conn->exec("COMMIT");
-
-        // Remove E-Mail SMTP-Data
-//        $this->conn
+        /*
+         * Submit Changes
+         */
+        $output->writeln('');
+        $output->writeln('<info>Commit changes</info>');
+        $this->conn->exec('COMMIT');
+        $output->writeln('');
+        $output->writeln('<info>Success!</info>');
 
         return 0;
     }
@@ -191,5 +139,149 @@ class RunCommand extends ShopwareCommand
             }
         }
         return $result;
+    }
+
+    protected function anonymizeData(InputInterface $input, OutputInterface $output)
+    {
+        /*
+         * Read base config
+         */
+        $configFile = __DIR__ . '/../config.json';
+        $replaceConfigFile = $input->getOption('config');
+        if ($replaceConfigFile) {
+            $configFile = $replaceConfigFile;
+        }
+        if (!is_file($configFile)) {
+            throw new \Exception("Anonymization configuration file does not exist.");
+        }
+        if (!is_readable($configFile)) {
+            $output->writeln('<error>The given config file is not readable</error>');
+            throw new \Exception("Anonymization configuration file is not readable");
+        }
+
+        $config = json_decode(file_get_contents($configFile));
+
+        if (!$config) {
+            $output->writeln('<error>The configuration contains invalid json</error>');
+        }
+
+        /*
+         * Read additional config
+         */
+        foreach ($input->getOption('additionalConfig') as $additionalConfigFile) {
+            if (!is_file($additionalConfigFile)) {
+                throw new \Exception("The additional config '$additionalConfigFile' is not a file");
+            }
+            if (!is_readable($additionalConfigFile)) {
+                throw new \Exception("The additional config '$additionalConfigFile' is not readable");
+            }
+
+            $additionalConfig = json_decode(file_get_contents($additionalConfigFile));
+            if (!$additionalConfig) {
+                throw new \Exception("The additional config '$additionalConfigFile' contains invalid json");
+            }
+            $config = array_replace_recursive($config, $additionalConfig);
+        }
+
+        // fetch schema information
+        $informationSchema = $this->fetchSchema($config);
+
+        // run anonymization
+        foreach ($config as $tableName => $tableConfig) {
+
+            if (!isset($informationSchema[$tableName])) {
+                $output->writeln("<warning>The table '$tableName' is configured but does not exist in db. Continuing with next table.</warning>");
+                continue;
+            }
+
+            $output->writeln("<info>Anonymize $tableName</info>");
+            $keys = $this->conn->query("SHOW KEYS FROM `$tableName` WHERE Key_name = 'PRIMARY'")->fetchAll(\PDO::FETCH_ASSOC);
+            $keyNames = array_map(function ($row) {
+                return $row['Column_name'];
+            }, $keys);
+            $keyNamesString = '`' . implode('`, `', $keyNames) . '`';
+            $columnNamesString = '`' . implode('`, `', array_keys((array)$tableConfig)) . '`';
+            $x = 1;
+            $stmt = $this->conn->query("SELECT $keyNamesString, $columnNamesString FROM `$tableName`");
+            while (($row = $stmt->fetch(\PDO::FETCH_ASSOC))) {
+                $qb = $this->conn->createQueryBuilder();
+                $qb->update($tableName);
+
+                $hasUpdate = false;
+                foreach ($tableConfig as $columnName => $value) {
+                    if (!isset($informationSchema[$tableName][$columnName])) {
+                        $output->writeln("<warning>The column '$tableName.$columnName' does not exist in db. Continuing with next column.</warning>");
+                        continue;
+                    }
+
+                    if (empty($row[$columnName])) {
+                        continue;
+                    }
+                    $hasUpdate = true;
+                    if (is_string($value)) {
+                        $value = str_replace('{{x}}', $x, $value);
+                    }
+                    $param = ":{$columnName}_{$x}";
+                    $qb->set($columnName, $param);
+                    $qb->setParameter($param, $value);
+                }
+                if (!$hasUpdate) continue;
+
+                foreach ($keyNames as $keyName) {
+                    $qb->where(
+                        $qb->expr()->eq($keyName, $row[$keyName])
+                    );
+                }
+                $qb->execute();
+                $x++;
+            }
+        }
+    }
+
+    /**
+     * Truncate customer search index
+     * Note: I used delete instead of truncate, because truncate does not respect fk etc. Delete is the saver method
+     *
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    protected function clearSearchIndex(InputInterface $input, OutputInterface $output)
+    {
+        $output->writeln("<info>Truncate customer search index</info>");
+        $this->conn->exec("DELETE FROM s_customer_search_index");
+    }
+
+    /**
+     * Wipes secrets from database (e.g. smtp password)
+     *
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     */
+    protected function removeSecrets(InputInterface $input, OutputInterface $output)
+    {
+        $noSecretRemove = $input->getOption(self::OPTION_NO_SECRET_REMOVE);
+        if ($noSecretRemove) return;
+
+        $output->writeln("");
+        $output->writeln('<info>Remove secrets</info>');
+        $output->writeln("<info>\tSet mail method to php mail & Remove smtp password</info>");
+
+        $this->configWriter->save('mailer_mailer', 'mail');
+        $this->configWriter->save('mailer_password', '');
+    }
+
+    /**
+     * Remove TLS flag from shops for enabling local development
+     *
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    protected function removeTLSFromShops(InputInterface $input, OutputInterface $output)
+    {
+        $output->writeln('<info>Deactivate TLS for all shops</info>');
+        $removeTLS = $input->getOption(self::OPTION_REMOVE_TLS);
+        if ($removeTLS) $this->conn->exec("UPDATE s_core_shops SET secure = 0");
     }
 }
