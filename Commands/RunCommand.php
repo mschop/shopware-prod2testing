@@ -11,8 +11,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class RunCommand extends ShopwareCommand
 {
-    const OPTION_REMOVE_TLS = 'remove-tls';
-    const OPTION_NO_SECRET_REMOVE = 'no-secret-wipe';
+    const OPTION_REMOVE_TLS = 'remove-secure-flag';
+    const OPTION_NO_SECRET_REMOVE = 'no-remove-secret';
 
     protected $conn;
     protected $dbConfig;

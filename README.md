@@ -42,3 +42,12 @@ You can also declare multiple --additionalConfig options and combine it with the
 bin/console prod2testing:run --additionalConfig /path1.json --additionalConfig /path2.json --config /base-config.json
 ```
 
+## Remove Secure Flag
+
+You can remove the secure flag from the shops, if your local installation does not have tls installed. Just use the
+`--remove-secure-flag` option, and the script will uncheck the secure flag for you.
+
+## No Remove Secret
+
+By default, the script will try to remove secret information like passwords from the db. If you don't want it to do
+that, just use the `--no-remove-secret` option.
