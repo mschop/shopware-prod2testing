@@ -74,8 +74,8 @@ class RunCommand extends ShopwareCommand
         /*
          * Start transaction
          */
-        $output->writeln('<info>START TRANSACTION</info>');
         $output->writeln('');
+        $output->writeln('<info>- start transaction</info>');
         $this->conn->exec('START TRANSACTION');
 
         /*
@@ -89,11 +89,11 @@ class RunCommand extends ShopwareCommand
         /*
          * Submit Changes
          */
-        $output->writeln('');
-        $output->writeln('<info>Commit changes</info>');
+        $output->writeln('<info>- commit changes</info>');
         $this->conn->exec('COMMIT');
         $output->writeln('');
         $output->writeln('<info>Success!</info>');
+        $output->writeln('');
 
         return 0;
     }
@@ -186,15 +186,17 @@ class RunCommand extends ShopwareCommand
         // fetch schema information
         $informationSchema = $this->fetchSchema($config);
 
+        $output->writeln('<info>- anonymize:</info>');
+
         // run anonymization
         foreach ($config as $tableName => $tableConfig) {
 
             if (!isset($informationSchema[$tableName])) {
-                $output->writeln("<warning>The table '$tableName' is configured but does not exist in db. Continuing with next table.</warning>");
+                $output->writeln("<warning>\t\tThe table '$tableName' is configured but does not exist in db. Continuing with next table.</warning>");
                 continue;
             }
 
-            $output->writeln("<info>Anonymize $tableName</info>");
+            $output->writeln("<info>\t- $tableName</info>");
             $keys = $this->conn->query("SHOW KEYS FROM `$tableName` WHERE Key_name = 'PRIMARY'")->fetchAll(\PDO::FETCH_ASSOC);
             $keyNames = array_map(function ($row) {
                 return $row['Column_name'];
@@ -210,7 +212,7 @@ class RunCommand extends ShopwareCommand
                 $hasUpdate = false;
                 foreach ($tableConfig as $columnName => $value) {
                     if (!isset($informationSchema[$tableName][$columnName])) {
-                        $output->writeln("<warning>The column '$tableName.$columnName' does not exist in db. Continuing with next column.</warning>");
+                        $output->writeln("<warning>\t\tThe column '$tableName.$columnName' does not exist in db. Continuing with next column.</warning>");
                         continue;
                     }
 
@@ -248,7 +250,7 @@ class RunCommand extends ShopwareCommand
      */
     protected function clearSearchIndex(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln("<info>Truncate customer search index</info>");
+        $output->writeln("<info>- truncate customer search index</info>");
         $this->conn->exec("DELETE FROM s_customer_search_index");
     }
 
@@ -263,9 +265,8 @@ class RunCommand extends ShopwareCommand
         $noSecretRemove = $input->getOption(self::OPTION_NO_SECRET_REMOVE);
         if ($noSecretRemove) return;
 
-        $output->writeln("");
-        $output->writeln('<info>Remove secrets</info>');
-        $output->writeln("<info>\tSet mail method to php mail & Remove smtp password</info>");
+        $output->writeln('<info>- remove secrets</info>');
+        $output->writeln("<info>\t- set mail method to php mail & remove smtp password</info>");
 
         $this->configWriter->save('mailer_mailer', 'mail');
         $this->configWriter->save('mailer_password', '');
@@ -280,7 +281,7 @@ class RunCommand extends ShopwareCommand
      */
     protected function removeTLSFromShops(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln('<info>Deactivate TLS for all shops</info>');
+        $output->writeln('<info>- deactivate tls for all shops</info>');
         $removeTLS = $input->getOption(self::OPTION_REMOVE_TLS);
         if ($removeTLS) $this->conn->exec("UPDATE s_core_shops SET secure = 0");
     }
