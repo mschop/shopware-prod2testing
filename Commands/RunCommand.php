@@ -72,14 +72,14 @@ class RunCommand extends ShopwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         /*
-         * Start transaction
+         * start transaction
          */
         $output->writeln('');
         $output->writeln('<info>- start transaction</info>');
         $this->conn->exec('START TRANSACTION');
 
         /*
-         * Do tasks
+         * do tasks
          */
         $this->anonymizeData($input, $output);
         $this->clearSearchIndex($input, $output);
@@ -87,7 +87,7 @@ class RunCommand extends ShopwareCommand
         $this->removeTLSFromShops($input, $output);
 
         /*
-         * Submit Changes
+         * submit Changes
          */
         $output->writeln('<info>- commit changes</info>');
         $this->conn->exec('COMMIT');
@@ -259,6 +259,7 @@ class RunCommand extends ShopwareCommand
      *
      * @param InputInterface $input
      * @param OutputInterface $output
+     * @throws \Doctrine\DBAL\DBALException
      */
     protected function removeSecrets(InputInterface $input, OutputInterface $output)
     {
@@ -268,8 +269,11 @@ class RunCommand extends ShopwareCommand
         $output->writeln('<info>- remove secrets</info>');
         $output->writeln("<info>\t- set mail method to php mail & remove smtp password</info>");
 
-        $this->configWriter->save('mailer_mailer', 'mail');
-        $this->configWriter->save('mailer_password', '');
+        $stmt = $this->conn->query("SELECT id FROM s_core_shops");
+        while(($shopId = $stmt->fetchColumn())) {
+            $this->configWriter->save('mailer_mailer', 'mail', null, $shopId);
+            $this->configWriter->save('mailer_password', '', null, $shopId);
+        }
     }
 
     /**
