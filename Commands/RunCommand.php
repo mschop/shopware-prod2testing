@@ -285,8 +285,10 @@ class RunCommand extends ShopwareCommand
      */
     protected function removeTLSFromShops(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln('<info>- deactivate tls for all shops</info>');
         $removeTLS = $input->getOption(self::OPTION_REMOVE_TLS);
-        if ($removeTLS) $this->conn->exec("UPDATE s_core_shops SET secure = 0");
+        if ($removeTLS) {
+            $output->writeln('<info>- deactivate tls for all shops</info>');
+            $this->conn->exec("UPDATE s_core_shops SET secure = 0");
+        }
     }
 }
