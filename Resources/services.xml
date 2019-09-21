@@ -11,5 +11,11 @@
             <argument type="service" id="config_writer" />
             <tag name="console.command" />
         </service>
+
+        <service class="Prod2Testing\Commands\ResetPasswordsCommand" id="prod2testing.commands.reset_passwords_command">
+            <argument id="dbal_connection" type="service"/>
+            <argument>%shopware.db%</argument>
+            <tag name="console.command"/>
+        </service>
     </services>
 </container>

@@ -51,3 +51,12 @@ You can remove the secure flag from the shops, if your local installation does n
 
 By default, the script will try to remove secret information like passwords from the db. If you don't want it to do
 that, just use the `--no-remove-secret` option.
+
+## Resetting passwords
+
+```
+bin/console prod2testing:reset-passwords [newpassword]
+```
+
+Resets all passwords in the user table to `newpassword`.
+This makes it easier to log in as different users during troubleshooting.
